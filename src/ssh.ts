@@ -31,22 +31,24 @@ export async function getConnections(): Promise<Connection[]> {
         const args = proc.cmd.split(" ").splice(1);
         const fwds = [];
         const pid = proc.pid;
-        let host: string = "";
+        let host = "";
 
         while (args.length > 0) {
-            const arg = args.shift()!;
+            const first = args.shift() || "";
 
             // consume options
-            if (arg.startsWith("-")) {
-                switch (arg) {
+            if (first.startsWith("-")) {
+                switch (first) {
                     case "-R":
-                    case "-L":
-                        const fwd = args.shift()!.split(":");
-                        let t = arg == "-L" ? "local" : "remote";
+                    case "-L": {
+                        const second = args.shift();
+                        if (second === undefined) break;
+                        const fwd = second.split(":");
+                        const type = first == "-L" ? "local" : "remote";
 
                         if (fwd.length == 3) {
                             fwds.push({
-                                type: t,
+                                type,
                                 src: Number(fwd[0]),
                                 dst: Number(fwd[2]),
                                 host: fwd[1],
@@ -55,7 +57,7 @@ export async function getConnections(): Promise<Connection[]> {
 
                         if (fwd.length == 4) {
                             fwds.push({
-                                type: t,
+                                type,
                                 src: Number(fwd[1]),
                                 dst: Number(fwd[3]),
                                 bind: fwd[0],
@@ -64,15 +66,20 @@ export async function getConnections(): Promise<Connection[]> {
                         }
 
                         break;
+                    }
 
-                    case "-D":
-                        const port = args.shift();
+                    case "-D": {
+                        const second = args.shift();
+                        if (second === undefined) break;
                         fwds.push({
                             type: "dynamic",
-                            src: Number(port),
-                            dst: Number(port),
+                            src: Number(second),
+                            dst: Number(second),
                             host: "localhost",
                         } as PortForward);
+
+                        break;
+                    }
 
                     case "-4":
                     case "-6":
@@ -98,14 +105,11 @@ export async function getConnections(): Promise<Connection[]> {
                     case "-X":
                     case "-x":
                     case "-y":
-                        break;
-
                     default:
-                        args.shift();
                         break;
                 }
             } else {
-                host = arg;
+                host = first;
                 break;
             }
         }
@@ -142,15 +146,15 @@ export async function getPortForwardGroups(): Promise<PortForwardGroup[]> {
 export function getPortForwardsForHost(host: string): PortForward[] {
     try {
         const file = readFileSync(homedir() + "/.ssh/config");
-        const config: any = SSHConfig.parse(file.toString()).compute(host);
-        let fwds: PortForward[] = [];
+        const config = SSHConfig.parse(file.toString()).compute(host);
+        const fwds: PortForward[] = [];
 
         if ("LocalForward" in config) {
-            (config["LocalForward"] as string[]).forEach((v) => {
-                let [a, b] = v.split(" ");
-                let [host, dst] = b.split(":");
+            (config["LocalForward"] as unknown as string[]).forEach((v) => {
+                const [a, b] = v.split(" ");
+                const [host, dst] = b.split(":");
 
-                let split = a.split(":");
+                const split = a.split(":");
                 let bind: string | undefined = split[0];
                 let src: string | undefined = split[1];
                 if (src === undefined) {
@@ -169,11 +173,11 @@ export function getPortForwardsForHost(host: string): PortForward[] {
         }
 
         if ("RemoteForward" in config) {
-            (config["RemoteForward"] as string[]).forEach((v) => {
-                let [a, b] = v.split(" ");
-                let [host, dst] = b.split(":");
+            (config["RemoteForward"] as unknown as string[]).forEach((v) => {
+                const [a, b] = v.split(" ");
+                const [host, dst] = b.split(":");
 
-                let split = a.split(":");
+                const split = a.split(":");
                 let bind: string | undefined = split[0];
                 let src: string | undefined = split[1];
                 if (src === undefined) {
@@ -192,7 +196,7 @@ export function getPortForwardsForHost(host: string): PortForward[] {
         }
 
         if ("DynamicForward" in config) {
-            (config["DynamicForward"] as string[]).forEach((v) =>
+            (config["DynamicForward"] as unknown as string[]).forEach((v) =>
                 fwds.push({
                     type: "dynamic",
                     src: Number(v),
@@ -237,10 +241,9 @@ export function getPortDescription(fwds: PortForward[], with_hosts = false) {
     return result;
 }
 
-
 export function open(c: Connection) {
-    let args = ["ssh", "-N"];
-    for (let fwd of c.fwds) {
+    const args = ["ssh", "-N"];
+    for (const fwd of c.fwds) {
         switch (fwd.type) {
             case "local":
             case "remote":

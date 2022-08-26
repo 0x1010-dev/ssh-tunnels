@@ -1,5 +1,5 @@
 import { ActionPanel, Action, Icon, List, confirmAlert } from "@raycast/api";
-import { PortForward, PortForwardGroup, getPortDescription } from "./ssh";
+import { PortForwardGroup, getPortDescription } from "./ssh";
 import { kill } from "process";
 
 export function PortForwardGroupSection(props: { item: PortForwardGroup; index: number }) {
@@ -24,7 +24,7 @@ export function PortForwardGroupSection(props: { item: PortForwardGroup; index: 
                                                 message: `${c.host} ${getPortDescription(c.fwds, true)}`,
                                             })
                                         ) {
-                                            kill(c.pid!, "SIGTERM");
+                                            kill(c.pid ? c.pid : 0, "SIGTERM");
                                         }
                                     }}
                                 ></Action>
@@ -36,5 +36,3 @@ export function PortForwardGroupSection(props: { item: PortForwardGroup; index: 
         </List.Section>
     );
 }
-
-

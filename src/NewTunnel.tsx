@@ -42,7 +42,9 @@ export default function NewTunnel() {
                                 toast.style = Toast.Style.Success;
                                 toast.title = "Created tunnel";
                                 pop();
-                            } catch {}
+                            } catch {
+                                console.log("Error Ignored");
+                            }
                         }}
                     />
                 </ActionPanel>
@@ -63,9 +65,9 @@ export default function NewTunnel() {
 }
 
 function createTunnel(form: FormData) {
-    let forwards: PortForward[] = [];
-    for (let p of form.ports.split(" ")) {
-        let c = p.split(":");
+    const forwards: PortForward[] = [];
+    for (const p of form.ports.split(" ")) {
+        const c = p.split(":");
 
         switch (c.length) {
             case 1:

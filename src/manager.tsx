@@ -19,13 +19,11 @@ export default function Command() {
                 const groups = await getPortForwardGroups();
                 setState({ items: groups });
 
-                // update subtitle
                 const subtitle = groups.reduce((p, v) => {
                     return p + `${v.host} ${getPortDescription(v.fwds, false)} `;
-                }, '');
+                }, "");
 
-                updateCommandMetadata({ subtitle: subtitle != '' ? subtitle : 'Manage active tunnels.' });
-
+                updateCommandMetadata({ subtitle: subtitle != "" ? subtitle : "Manage active tunnels." });
             } catch (error) {
                 setState({ error: error instanceof Error ? error : new Error("Something went wrong") });
             }

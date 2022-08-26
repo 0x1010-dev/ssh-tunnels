@@ -1,7 +1,7 @@
 {
     "$schema": "https://www.raycast.com/schemas/extension.json",
-    "name": "ssh-tunneling",
-    "title": "SSH Tunneling",
+    "name": "ssh-tunnels",
+    "title": "SSH Tunnels",
     "description": "Sets up and manages port forwarding through SSH.",
     "icon": "tunnel-icon.png",
     "author": "0x1010-dev",
