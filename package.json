@@ -5,6 +5,7 @@
     "description": "Sets up and manages port forwarding through SSH.",
     "icon": "tunnel-icon.png",
     "author": "0x1010-dev",
+    "categories": ["Developer Tools"],
     "license": "MIT",
     "commands": [
         {
